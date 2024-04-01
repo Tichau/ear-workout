@@ -1,0 +1,42 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "npm",
+            "script": "dev",
+            "problemMatcher": [],
+            "label": "npm: dev",
+            "detail": "vite dev"
+        },
+        {
+            "type": "npm",
+            "script": "build",
+            "group": "build",
+            "problemMatcher": [],
+            "label": "npm: build",
+            "detail": "vite build"
+        },
+        {
+            "type": "npm",
+            "script": "preview",
+            "problemMatcher": [],
+            "label": "npm: preview",
+            "detail": "vite preview"
+        },
+        {
+            "type": "npm",
+            "script": "check",
+            "problemMatcher": [],
+            "label": "npm: check",
+            "detail": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+        },
+        {
+            "type": "npm",
+            "script": "check:watch",
+            "group": "build",
+            "problemMatcher": [],
+            "label": "npm: check:watch",
+            "detail": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+        }
+    ]
+}
