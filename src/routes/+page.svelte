@@ -15,21 +15,26 @@
     getRandomChord();
 </script>
 
-<h1>Welcome to Ear Workout</h1>
-
-<button on:click={getRandomChord}>Generate</button>
+<h1 class="title">Welcome to Ear Workout</h1>
+<p class="subtitle">Will you sing all the chords?</p>
 
 {#if chord !== undefined}
-<p>
-    Chord: {chord.name}
-</p>
-<p>
-    Notes: 
-    {#each chord.notes as note, i}
-    {note.name}
-    {#if i < chord.notes.length - 1}
-    -&nbsp;
-    {/if}
-    {/each}
-</p>
+
+    <div class="box content">
+        <h2>Chord: {chord.name}</h2>
+        <p>
+            Notes: 
+            {#each chord.notes as note, i}
+                {note.name}
+                {#if i < chord.notes.length - 1}
+                    -&nbsp;
+                {/if}
+            {/each}
+        </p>
+    </div>
+
 {/if}
+
+<div class="buttons has-addons is-centered">
+  <button class="button is-large" on:click={getRandomChord}>Generate</button>
+</div>
