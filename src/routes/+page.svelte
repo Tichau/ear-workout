@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { version } from '$app/environment';
     import { Chord, rootNotes, chordTypes } from '$lib/music-theory'
     
     let chord: Chord | undefined;
@@ -61,4 +62,10 @@
 
 <div class="buttons has-addons is-centered">
   <button class="button is-large" on:click={getRandomChord}>Generate</button>
+</div>
+
+<div class="content has-text-centered has-text-weight-light is-size-7">
+    <p>
+        Ear Workout v{version}
+    </p>
 </div>
