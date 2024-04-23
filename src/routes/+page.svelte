@@ -9,7 +9,31 @@
         index = Math.floor(Math.random() * chordTypes.length);
         let chordType = chordTypes[index];
 
-        chord = new Chord(rootNote, chordType);
+        let inversion = Math.floor(Math.random() * chordType.inversionCount);
+
+        let drop: number[] = [];
+        if (chordType.inversionCount === 3) {
+            if (Math.random() >= 0.5) {
+                drop = [2];
+            }
+        }
+        else if (chordType.inversionCount === 4) {
+            switch (Math.floor(Math.random() * 5)) {
+                case 0:
+                    break;
+                case 1:
+                    drop = [2];
+                case 2:
+                    drop = [3];
+                case 3:
+                    drop = [1,3];
+                case 4:
+                    drop = [2,4];
+            }
+        }
+
+        chord = new Chord(rootNote, chordType, inversion, drop);
+        // chord = Chord.FromName('Ab', 'dim7', 2, Drop.Drop3);
     }
 
     getRandomChord();
@@ -25,7 +49,7 @@
         <p>
             Notes: 
             {#each chord.notes as note, i}
-                {note.name}
+                {note.name}{note.octave}
                 {#if i < chord.notes.length - 1}
                     -&nbsp;
                 {/if}

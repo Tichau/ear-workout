@@ -1,16 +1,19 @@
-import { select } from "underscore";
+import { select, clone, sortBy } from "underscore";
 
 export class Note {
     name: string;
     semitone: number; // offset from C ∈ [0,11]
     degreeOffset: number; // degree ∈ [0,6]
     canBeRootNote: boolean;
+    octave: number;
 
     constructor(name: string, semitone: number, degreeOffset: number, canBeRootNote: boolean) {
+        console.assert(semitone >= 0);
         this.name = name;
         this.semitone = semitone % 12;
         this.canBeRootNote = canBeRootNote;
         this.degreeOffset = degreeOffset - 1;
+        this.octave = 2;
     }
 }
 
@@ -27,16 +30,18 @@ class Interval {
 export class ChordType {
     name: string;
     degrees: Interval[];
+    inversionCount: number;
 
     constructor(name: string, degrees: Interval[]) {
         this.name = name;
         this.degrees = degrees;
+        this.inversionCount = degrees.length == 2 ? 3 : 4;
     }
 }
 
 export const notes: Note[] = [
-    new Note('Cbb', -2, 1, false),
-    new Note('Cb', -1, 1, false),
+    new Note('Cbb', 10, 1, false),
+    new Note('Cb', 11, 1, false),
     new Note('C', 0, 1, true),
     new Note('C#', 1, 1, true),
     new Note('Cx', 2, 1, false),
@@ -74,19 +79,88 @@ export const rootNotes: Note[] = select(notes, note => note.canBeRootNote);
 
 export const chordTypes: ChordType[] = [
     new ChordType('Maj', [new Interval(4, 3), new Interval(7, 5)]),
-    new ChordType('Min', [new Interval(3, 3), new Interval(7, 5)]),
-    new ChordType('Dim', [new Interval(3, 3), new Interval(6, 5)]),
+    new ChordType('min', [new Interval(3, 3), new Interval(7, 5)]),
+    new ChordType('dim', [new Interval(3, 3), new Interval(6, 5)]),
     new ChordType('Aug', [new Interval(4, 3), new Interval(8, 5)]),
+    new ChordType('sus2', [new Interval(2, 2), new Interval(7, 5)]),
+    new ChordType('sus4', [new Interval(5, 4), new Interval(7, 5)]),
+    new ChordType('add2', [new Interval(2, 2), new Interval(4, 3), new Interval(7, 5)]),
+    new ChordType('madd2', [new Interval(2, 2), new Interval(3, 3), new Interval(7, 5)]),
+    new ChordType('add4', [new Interval(4, 3), new Interval(5, 4), new Interval(7, 5)]),
+    new ChordType('madd4', [new Interval(3, 3), new Interval(5, 4), new Interval(7, 5)]),
     new ChordType('Maj7', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7)]),
-    new ChordType('Min7', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7)]),
-    new ChordType('-7b5', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7)]),
+    new ChordType('min7', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7)]),
+    new ChordType('min7b5', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7)]),
     new ChordType('7', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7)]),
-    new ChordType('Min(Maj7)', [new Interval(3, 3), new Interval(7, 5), new Interval(11, 7)]),
+    new ChordType('dim7', [new Interval(3, 3), new Interval(6, 5), new Interval(9, 7)]),
+    new ChordType('min(Maj7)', [new Interval(3, 3), new Interval(7, 5), new Interval(11, 7)]),
     new ChordType('Maj7#5', [new Interval(4, 3), new Interval(8, 5), new Interval(11, 7)]),
     new ChordType('Maj7b5', [new Interval(4, 3), new Interval(6, 5), new Interval(11, 7)]),
     new ChordType('7#5', [new Interval(4, 3), new Interval(8, 5), new Interval(10, 7)]),
     new ChordType('7b5', [new Interval(4, 3), new Interval(6, 5), new Interval(10, 7)]),
+    new ChordType('Maj6', [new Interval(4, 3), new Interval(7, 5), new Interval(9, 6)]),
+    new ChordType('min6', [new Interval(3, 3), new Interval(7, 5), new Interval(9, 6)]),
+    new ChordType('Maj7(sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(11, 7)]),
+    new ChordType('7(sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(10, 7)]),
+    new ChordType('Maj7(sus2)', [new Interval(2, 2), new Interval(7, 5), new Interval(11, 7)]),
+    new ChordType('7(sus2)', [new Interval(2, 2), new Interval(7, 5), new Interval(10, 7)]),
+    new ChordType('Maj7(9)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2)]),
+    new ChordType('Maj7(9sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2)]),
+    new ChordType('min7(9)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2)]),
+    new ChordType('7(9)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2)]),
+    new ChordType('7(9sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2)]),
+    new ChordType('7(b9sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2)]),
+    new ChordType('min7b5(9)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2)]),
+    new ChordType('7(b9)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2)]),
+    new ChordType('7(#9)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2)]),
+    new ChordType('Maj7(#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(18, 4)]),
+    new ChordType('min7(11)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(17, 4)]),
+    new ChordType('min7b5(11)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(17, 4)]),
+    new ChordType('7(#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(18, 4)]),
+    new ChordType('Maj7(13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(21, 6)]),
+    new ChordType('min7(13)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(21, 6)]),
+    new ChordType('7(13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(21, 6)]),
+    new ChordType('Maj7(b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(20, 6)]),
+    new ChordType('7(b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(20, 6)]),
+    new ChordType('Maj7(9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2), new Interval(18, 4)]),
+    new ChordType('7(9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(18, 4)]),
+    new ChordType('7(b9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(18, 4)]),
+    new ChordType('7(#9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(18, 4)]),
+    new ChordType('min7(9,11)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2),  new Interval(17, 4)]),
+    new ChordType('min7b5(9,11)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2), new Interval(17, 4)]),
+    new ChordType('Maj7(9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2), new Interval(21, 6)]),
+    new ChordType('7(9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(21, 6)]),
+    new ChordType('7(b9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(21, 6)]),
+    new ChordType('7(#9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(21, 6)]),
+    new ChordType('7(9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(20, 6)]),
+    new ChordType('7(b9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(20, 6)]),
+    new ChordType('7(#9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(20, 6)]),
+    new ChordType('min7(9,13)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2),  new Interval(21, 6)]),
+    new ChordType('min7b5(9,13)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2), new Interval(21, 6)]),
+    new ChordType('Maj7(9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2), new Interval(18, 4), new Interval(21, 6)]),
+    new ChordType('7(9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(18, 4), new Interval(21, 6)]),
+    new ChordType('7(b9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(18, 4), new Interval(21, 6)]),
+    new ChordType('7(#9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(18, 4), new Interval(21, 6)]),
+    new ChordType('7(9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(18, 4), new Interval(20, 6)]),
+    new ChordType('7(b9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(18, 4), new Interval(20, 6)]),
+    new ChordType('7(#9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(18, 4), new Interval(20, 6)]),
+    new ChordType('min7(9,11,13)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(17, 4),  new Interval(21, 6)]),
+    new ChordType('min7b5(9,11,13)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2), new Interval(17, 4), new Interval(21, 6)]),
+    new ChordType('7(b9,#9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(18, 4), new Interval(20, 6)]),
+    new ChordType('7(b9,#9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(18, 4), new Interval(21, 6)]),
+    new ChordType('7(b9,#9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(21, 6)]),
+    new ChordType('7(b9,#9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(20, 6)]),
+    new ChordType('7b5(b9,#9,b13)', [new Interval(4, 3), new Interval(6, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(20, 6)]),
 ];
+
+export enum Drop {
+    None,
+
+    Drop2,
+    Drop3,
+    Drop13,
+    Drop24,
+}
 
 export class Chord {
     name: string;
@@ -94,24 +168,67 @@ export class Chord {
     type: ChordType;
     notes: Note[];
 
-    constructor(rootNote: Note, type: ChordType) {
+    constructor(rootNote: Note, type: ChordType, inversion: number, drop: number[]) {
         this.name = `${rootNote.name}${type.name}`;
-        this.rootNote = rootNote;
+        this.rootNote = clone(rootNote);
         this.type = type;
 
-        this.notes = [ rootNote ];
+        this.notes = [ this.rootNote ];
         for (let i = 0; i < type.degrees.length; ++i) {
-            let semitone = (rootNote.semitone + type.degrees[i].semitone) % 12;
-            let degree = (rootNote.degreeOffset + type.degrees[i].degree) % 7;
-
-            let note = notes.find(note => note.semitone == semitone && note.degreeOffset == degree);
+            let semitone = (this.rootNote.semitone + type.degrees[i].semitone) % 12;
+            let degree = (this.rootNote.degreeOffset + type.degrees[i].degree) % 7;
+            
+            let note = clone(notes.find(note => note.semitone == semitone && note.degreeOffset == degree));
             if (note === undefined)
             {
-                console.error(`Can't find note (st: ${semitone} deg: ${degree}). rootnote: (st: ${rootNote.semitone} deg: ${rootNote.degreeOffset}) interval: (st: ${type.degrees[i].semitone} deg: ${type.degrees[i].degree})`);
+                console.error(`Can't find note (st: ${semitone} deg: ${degree}). rootnote: (st: ${this.rootNote.semitone} deg: ${this.rootNote.degreeOffset}) interval: (st: ${type.degrees[i].semitone} deg: ${type.degrees[i].degree})`);
                 continue;
             }
 
+            note.octave += Math.floor((this.rootNote.semitone + type.degrees[i].semitone) / 12);
+
             this.notes.push(note)
         }
+
+        var tempInversion = inversion;
+        var dropName = "";
+        
+        if (drop.length > 0) {
+            dropName += ` drop `;
+            var lastDrop = drop[drop.length - 1];
+            tempInversion = (inversion + type.inversionCount - (4 - lastDrop)) % type.inversionCount;
+        }
+
+        // Apply inversion.
+        for (let i = 0; i < tempInversion; ++i) {
+            this.notes[i].octave++;
+        }
+
+        this.notes = sortBy(this.notes, note => note.octave * 12 + note.semitone);
+
+        for (var d = 0; d < drop.length; d++) {
+            dropName += d > 0 ? `,${drop[d]}` : drop[d];
+            this.notes[type.inversionCount - drop[d]].octave--;
+        }
+
+        this.notes = sortBy(this.notes, note => note.octave * 12 + note.semitone);
+
+        if (this.notes[0].name != this.rootNote.name) {
+            this.name += `/${this.notes[0].name}`
+        }
+
+        this.name += dropName;
+    }
+
+    public static FromName(rootNoteName: string, chordTypeName: string, inversion: number, drop: number[]): Chord | undefined {
+        var rootNote = rootNotes.find(note => note.name === rootNoteName);
+        var chordType = chordTypes.find(chord => chord.name === chordTypeName);
+
+        if (rootNote !== undefined && chordType !== undefined)
+        {
+            return new Chord(rootNote, chordType, inversion, drop);
+        }
+
+        return undefined;
     }
 }
