@@ -2,13 +2,61 @@
     import { version } from '$app/environment';
     import { Chord, rootNotes, chordTypes, ChordFamily } from '$lib/music-theory'
     
+    class Filter {
+        name: string;
+        active: boolean;
+        chordFamily: ChordFamily;
+
+        constructor(name: string, chordFamily: ChordFamily, active: boolean = false) {
+            this.name = name;
+            this.chordFamily = chordFamily;
+            this.active = active;
+        }
+    }
+
+    // Prepare chord type filters using the list of all chords.
+    let chordTypeFilters: Filter[] = [];
+    for (let i = 0; i < chordTypes.length; ++i) {
+        const chordType = chordTypes[i];
+        if (chordType.family === ChordFamily.Triad && chordType.degrees.length == 2) {
+            chordTypeFilters.push(new Filter(chordType.name, chordType.family, chordType.name == 'Maj'));
+        }
+        else if (chordType.family === ChordFamily.Tetrad && chordType.degrees.length == 3) {
+            chordTypeFilters.push(new Filter(chordType.name, chordType.family));
+        }
+    }
+
     let chord: Chord | undefined;
     function getRandomChord() {
         let index = Math.floor(Math.random() * rootNotes.length);
         let rootNote = rootNotes[index];
 
-        index = Math.floor(Math.random() * chordTypes.length);
-        let chordType = chordTypes[index];
+        let activeChordTypeCount = 0;
+        for (let i = 0; i < chordTypeFilters.length; ++i) {
+            const filter = chordTypeFilters[i];
+            if (filter.active) {
+                activeChordTypeCount++;
+            }
+        }
+
+        index = Math.floor(Math.random() * activeChordTypeCount);
+        
+        let chordType;
+        for (let i = 0; i < chordTypeFilters.length; ++i) {
+            const filter = chordTypeFilters[i];
+            if (filter.active) {
+                if (index === 0) {
+                    chordType = chordTypes.find(chord => chord.name === filter.name);
+                }
+                
+                index--;
+            }
+        }
+
+        if (chordType === undefined) {
+            console.error("Can't find any chord type with current filters.")
+            return;
+        }
 
         let inversion = Math.floor(Math.random() * chordType.inversionCount);
 
@@ -61,7 +109,42 @@
 {/if}
 
 <div class="buttons has-addons is-centered">
-  <button class="button is-large" on:click={getRandomChord}>Generate</button>
+    <button class="button is-large" on:click={getRandomChord}>Generate</button>
+  </div>
+
+<div>
+    <h3 class="title is-3">Chord filters</h3>
+
+    <div class="columns">
+        <div class="column">
+            <h4 class="title is-4">Triad</h4>
+            <div class="grid">
+                {#each chordTypeFilters as filter}
+                    {#if filter.chordFamily === ChordFamily.Triad}
+                        <div class="cell">
+                            <button class="button is-rounded" class:is-active={filter.active} on:click={_ => filter.active = !filter.active}>
+                                {filter.name}
+                            </button>
+                        </div>
+                    {/if}
+                {/each}
+            </div>
+        </div>
+        <div class="column">
+            <h4 class="title is-4">Tetrad</h4>
+            <div class="grid">
+                {#each chordTypeFilters as filter}
+                    {#if filter.chordFamily === ChordFamily.Tetrad}
+                        <div class="cell">
+                            <button class="button is-rounded" class:is-active={filter.active} on:click={_ => filter.active = !filter.active}>
+                                {filter.name}
+                            </button>
+                        </div>
+                    {/if}
+                {/each}
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="content has-text-centered has-text-weight-light is-size-7">
