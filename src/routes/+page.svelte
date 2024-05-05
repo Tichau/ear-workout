@@ -29,11 +29,22 @@
     let inversionFilter = [0];
     function toggleInversion(inversion: number) {
         const index = inversionFilter.indexOf(inversion);
-        if (inversionFilter.indexOf(inversion) < 0) {
+        if (index < 0) {
             inversionFilter = [...inversionFilter, inversion];
         } else {
             inversionFilter.splice(index, 1);
             inversionFilter = inversionFilter; // this is needed to tell svelte to refresh inversionFilter dependencies: https://learn.svelte.dev/tutorial/updating-arrays-and-objects
+        }
+    }
+
+    let dropFilter: number[] = [0];
+    function toggleDrop(drop: number) {
+        const index = dropFilter.indexOf(drop);
+        if (index < 0) {
+            dropFilter = [...dropFilter, drop];
+        } else {
+            dropFilter.splice(index, 1);
+            dropFilter = dropFilter; // this is needed to tell svelte to refresh dropFilter dependencies: https://learn.svelte.dev/tutorial/updating-arrays-and-objects
         }
     }
 
@@ -87,25 +98,39 @@
         index = Math.floor(Math.random() * inversions.length);
         let inversion = inversions[index];
 
-        let drop: number[] = [];
-        if (chordType.inversionCount === 3) {
-            if (Math.random() >= 0.5) {
-                drop = [2];
+        // Drop:
+        let drops = [];
+        for (let i = 0; i < dropFilter.length; i++) {
+            let dropIndex = dropFilter[i];
+            if (dropIndex <= 1 || chordType.family === ChordFamily.Tetrad) {
+                drops.push(dropIndex);
             }
         }
-        else if (chordType.family === ChordFamily.Tetrad) {
-            switch (Math.floor(Math.random() * 5)) {
-                case 0:
-                    break;
-                case 1:
-                    drop = [2];
-                case 2:
-                    drop = [3];
-                case 3:
-                    drop = [1,3];
-                case 4:
-                    drop = [2,4];
-            }
+
+        if (drops.length === 0) {
+            console.error("No drops available for current filters.")
+            return;
+        }
+
+        index = Math.floor(Math.random() * drops.length);
+
+        let drop: number[] = [];
+        switch (drops[index]) {
+            case 0:
+                drop= [];
+                break;
+            case 1:
+                drop= [2];
+                break;
+            case 2:
+                drop = [3];
+                break;
+            case 3:
+                drop = [1,3];
+                break;
+            case 4:
+                drop = [2,4];
+                break;
         }
 
         chord = new Chord(rootNote, chordType, inversion, drop);
@@ -186,6 +211,28 @@
                     </button>
                     <button class="button is-rounded" class:is-active={inversionFilter.indexOf(3) !== -1} on:click={_ => toggleInversion(3)}>
                         R3
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="column">
+            <h4 class="title is-4">Drop</h4>
+            <div class="grid">
+                <div class="cell">
+                    <button class="button is-rounded" class:is-active={dropFilter.indexOf(0) !== -1} on:click={_ => toggleDrop(0)}>
+                        None
+                    </button>
+                    <button class="button is-rounded" class:is-active={dropFilter.indexOf(1) !== -1} on:click={_ => toggleDrop(1)}>
+                        2
+                    </button>
+                    <button class="button is-rounded" class:is-active={dropFilter.indexOf(2) !== -1} on:click={_ => toggleDrop(2)}>
+                        3
+                    </button>
+                    <button class="button is-rounded" class:is-active={dropFilter.indexOf(3) !== -1} on:click={_ => toggleDrop(3)}>
+                        1,3
+                    </button>
+                    <button class="button is-rounded" class:is-active={dropFilter.indexOf(4) !== -1} on:click={_ => toggleDrop(4)}>
+                        2,4
                     </button>
                 </div>
             </div>
