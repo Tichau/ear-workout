@@ -1,6 +1,6 @@
 <script lang="ts">
     import { version } from '$app/environment';
-    import { Chord, rootNotes, chordTypes } from '$lib/music-theory'
+    import { Chord, rootNotes, chordTypes, ChordFamily } from '$lib/music-theory'
     
     let chord: Chord | undefined;
     function getRandomChord() {
@@ -18,7 +18,7 @@
                 drop = [2];
             }
         }
-        else if (chordType.inversionCount === 4) {
+        else if (chordType.family === ChordFamily.Tetrad) {
             switch (Math.floor(Math.random() * 5)) {
                 case 0:
                     break;
@@ -34,7 +34,7 @@
         }
 
         chord = new Chord(rootNote, chordType, inversion, drop);
-        // chord = Chord.FromName('Ab', 'dim7', 2, Drop.Drop3);
+        // chord = Chord.FromName('C', 'Maj7', 0, [1,3]);
     }
 
     getRandomChord();

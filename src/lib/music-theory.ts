@@ -27,15 +27,34 @@ class Interval {
     }
 }
 
+export enum ChordFamily {
+    Triad,
+    Tetrad,
+}
+
 export class ChordType {
     name: string;
     degrees: Interval[];
+    family: ChordFamily;
     inversionCount: number;
 
-    constructor(name: string, degrees: Interval[]) {
+    constructor(name: string, degrees: Interval[], family: ChordFamily) {
         this.name = name;
         this.degrees = degrees;
+        this.family = family;
         this.inversionCount = degrees.length == 2 ? 3 : 4;
+    }
+
+    public isDropCompatible(dropIndex: number): boolean {
+        if (this.family == ChordFamily.Triad && this.inversionCount == 3) {
+            return dropIndex == 2;
+        }
+
+        if (this.family == ChordFamily.Tetrad) {
+            return dropIndex >= 1 && dropIndex <= 4;
+        }
+
+        return false;
     }
 }
 
@@ -78,89 +97,80 @@ export const notes: Note[] = [
 export const rootNotes: Note[] = select(notes, note => note.canBeRootNote);
 
 export const chordTypes: ChordType[] = [
-    new ChordType('Maj', [new Interval(4, 3), new Interval(7, 5)]),
-    new ChordType('min', [new Interval(3, 3), new Interval(7, 5)]),
-    new ChordType('dim', [new Interval(3, 3), new Interval(6, 5)]),
-    new ChordType('Aug', [new Interval(4, 3), new Interval(8, 5)]),
-    new ChordType('sus2', [new Interval(2, 2), new Interval(7, 5)]),
-    new ChordType('sus4', [new Interval(5, 4), new Interval(7, 5)]),
-    new ChordType('add2', [new Interval(2, 2), new Interval(4, 3), new Interval(7, 5)]),
-    new ChordType('madd2', [new Interval(2, 2), new Interval(3, 3), new Interval(7, 5)]),
-    new ChordType('add4', [new Interval(4, 3), new Interval(5, 4), new Interval(7, 5)]),
-    new ChordType('madd4', [new Interval(3, 3), new Interval(5, 4), new Interval(7, 5)]),
-    new ChordType('Maj7', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7)]),
-    new ChordType('min7', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7)]),
-    new ChordType('min7b5', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7)]),
-    new ChordType('7', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7)]),
-    new ChordType('dim7', [new Interval(3, 3), new Interval(6, 5), new Interval(9, 7)]),
-    new ChordType('min(Maj7)', [new Interval(3, 3), new Interval(7, 5), new Interval(11, 7)]),
-    new ChordType('Maj7#5', [new Interval(4, 3), new Interval(8, 5), new Interval(11, 7)]),
-    new ChordType('Maj7b5', [new Interval(4, 3), new Interval(6, 5), new Interval(11, 7)]),
-    new ChordType('7#5', [new Interval(4, 3), new Interval(8, 5), new Interval(10, 7)]),
-    new ChordType('7b5', [new Interval(4, 3), new Interval(6, 5), new Interval(10, 7)]),
-    new ChordType('Maj6', [new Interval(4, 3), new Interval(7, 5), new Interval(9, 6)]),
-    new ChordType('min6', [new Interval(3, 3), new Interval(7, 5), new Interval(9, 6)]),
-    new ChordType('Maj7(sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(11, 7)]),
-    new ChordType('7(sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(10, 7)]),
-    new ChordType('Maj7(sus2)', [new Interval(2, 2), new Interval(7, 5), new Interval(11, 7)]),
-    new ChordType('7(sus2)', [new Interval(2, 2), new Interval(7, 5), new Interval(10, 7)]),
-    new ChordType('Maj7(9)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2)]),
-    new ChordType('Maj7(9sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2)]),
-    new ChordType('min7(9)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2)]),
-    new ChordType('7(9)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2)]),
-    new ChordType('7(9sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2)]),
-    new ChordType('7(b9sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2)]),
-    new ChordType('min7b5(9)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2)]),
-    new ChordType('7(b9)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2)]),
-    new ChordType('7(#9)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2)]),
-    new ChordType('Maj7(#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(18, 4)]),
-    new ChordType('min7(11)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(17, 4)]),
-    new ChordType('min7b5(11)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(17, 4)]),
-    new ChordType('7(#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(18, 4)]),
-    new ChordType('Maj7(13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(21, 6)]),
-    new ChordType('min7(13)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(21, 6)]),
-    new ChordType('7(13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(21, 6)]),
-    new ChordType('Maj7(b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(20, 6)]),
-    new ChordType('7(b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(20, 6)]),
-    new ChordType('Maj7(9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2), new Interval(18, 4)]),
-    new ChordType('7(9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(18, 4)]),
-    new ChordType('7(b9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(18, 4)]),
-    new ChordType('7(#9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(18, 4)]),
-    new ChordType('min7(9,11)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2),  new Interval(17, 4)]),
-    new ChordType('min7b5(9,11)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2), new Interval(17, 4)]),
-    new ChordType('Maj7(9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2), new Interval(21, 6)]),
-    new ChordType('7(9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(21, 6)]),
-    new ChordType('7(b9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(21, 6)]),
-    new ChordType('7(#9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(21, 6)]),
-    new ChordType('7(9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(20, 6)]),
-    new ChordType('7(b9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(20, 6)]),
-    new ChordType('7(#9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(20, 6)]),
-    new ChordType('min7(9,13)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2),  new Interval(21, 6)]),
-    new ChordType('min7b5(9,13)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2), new Interval(21, 6)]),
-    new ChordType('Maj7(9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2), new Interval(18, 4), new Interval(21, 6)]),
-    new ChordType('7(9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(18, 4), new Interval(21, 6)]),
-    new ChordType('7(b9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(18, 4), new Interval(21, 6)]),
-    new ChordType('7(#9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(18, 4), new Interval(21, 6)]),
-    new ChordType('7(9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(18, 4), new Interval(20, 6)]),
-    new ChordType('7(b9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(18, 4), new Interval(20, 6)]),
-    new ChordType('7(#9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(18, 4), new Interval(20, 6)]),
-    new ChordType('min7(9,11,13)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(17, 4),  new Interval(21, 6)]),
-    new ChordType('min7b5(9,11,13)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2), new Interval(17, 4), new Interval(21, 6)]),
-    new ChordType('7(b9,#9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(18, 4), new Interval(20, 6)]),
-    new ChordType('7(b9,#9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(18, 4), new Interval(21, 6)]),
-    new ChordType('7(b9,#9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(21, 6)]),
-    new ChordType('7(b9,#9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(20, 6)]),
-    new ChordType('7b5(b9,#9,b13)', [new Interval(4, 3), new Interval(6, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(20, 6)]),
+    new ChordType('Maj', [new Interval(4, 3), new Interval(7, 5)], ChordFamily.Triad),
+    new ChordType('min', [new Interval(3, 3), new Interval(7, 5)], ChordFamily.Triad),
+    new ChordType('dim', [new Interval(3, 3), new Interval(6, 5)], ChordFamily.Triad),
+    new ChordType('Aug', [new Interval(4, 3), new Interval(8, 5)], ChordFamily.Triad),
+    new ChordType('sus2', [new Interval(2, 2), new Interval(7, 5)], ChordFamily.Triad),
+    new ChordType('sus4', [new Interval(5, 4), new Interval(7, 5)], ChordFamily.Triad),
+    new ChordType('add2', [new Interval(2, 2), new Interval(4, 3), new Interval(7, 5)], ChordFamily.Triad),
+    new ChordType('madd2', [new Interval(2, 2), new Interval(3, 3), new Interval(7, 5)], ChordFamily.Triad),
+    new ChordType('add4', [new Interval(4, 3), new Interval(5, 4), new Interval(7, 5)], ChordFamily.Triad),
+    new ChordType('madd4', [new Interval(3, 3), new Interval(5, 4), new Interval(7, 5)], ChordFamily.Triad),
+    new ChordType('Maj7', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7)], ChordFamily.Tetrad),
+    new ChordType('min7', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7)], ChordFamily.Tetrad),
+    new ChordType('min7b5', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7)], ChordFamily.Tetrad),
+    new ChordType('7', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7)], ChordFamily.Tetrad),
+    new ChordType('dim7', [new Interval(3, 3), new Interval(6, 5), new Interval(9, 7)], ChordFamily.Tetrad),
+    new ChordType('min(Maj7)', [new Interval(3, 3), new Interval(7, 5), new Interval(11, 7)], ChordFamily.Tetrad),
+    new ChordType('Maj7#5', [new Interval(4, 3), new Interval(8, 5), new Interval(11, 7)], ChordFamily.Tetrad),
+    new ChordType('Maj7b5', [new Interval(4, 3), new Interval(6, 5), new Interval(11, 7)], ChordFamily.Tetrad),
+    new ChordType('7#5', [new Interval(4, 3), new Interval(8, 5), new Interval(10, 7)], ChordFamily.Tetrad),
+    new ChordType('7b5', [new Interval(4, 3), new Interval(6, 5), new Interval(10, 7)], ChordFamily.Tetrad),
+    new ChordType('Maj6', [new Interval(4, 3), new Interval(7, 5), new Interval(9, 6)], ChordFamily.Tetrad),
+    new ChordType('min6', [new Interval(3, 3), new Interval(7, 5), new Interval(9, 6)], ChordFamily.Tetrad),
+    new ChordType('Maj7(sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(11, 7)], ChordFamily.Tetrad),
+    new ChordType('7(sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(10, 7)], ChordFamily.Tetrad),
+    new ChordType('Maj7(sus2)', [new Interval(2, 2), new Interval(7, 5), new Interval(11, 7)], ChordFamily.Tetrad),
+    new ChordType('7(sus2)', [new Interval(2, 2), new Interval(7, 5), new Interval(10, 7)], ChordFamily.Tetrad),
+    new ChordType('Maj7(9)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2)], ChordFamily.Tetrad),
+    new ChordType('Maj7(9sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2)], ChordFamily.Tetrad),
+    new ChordType('min7(9)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2)], ChordFamily.Tetrad),
+    new ChordType('7(9)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2)], ChordFamily.Tetrad),
+    new ChordType('7(9sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2)], ChordFamily.Tetrad),
+    new ChordType('7(b9sus4)', [new Interval(5, 4), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2)], ChordFamily.Tetrad),
+    new ChordType('min7b5(9)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2)], ChordFamily.Tetrad),
+    new ChordType('7(b9)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2)], ChordFamily.Tetrad),
+    new ChordType('7(#9)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2)], ChordFamily.Tetrad),
+    new ChordType('Maj7(#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(18, 4)], ChordFamily.Tetrad),
+    new ChordType('min7(11)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(17, 4)], ChordFamily.Tetrad),
+    new ChordType('min7b5(11)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(17, 4)], ChordFamily.Tetrad),
+    new ChordType('7(#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(18, 4)], ChordFamily.Tetrad),
+    new ChordType('Maj7(13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('min7(13)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('Maj7(b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(20, 6)], ChordFamily.Tetrad),
+    new ChordType('7(b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(20, 6)], ChordFamily.Tetrad),
+    new ChordType('Maj7(9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2), new Interval(18, 4)], ChordFamily.Tetrad),
+    new ChordType('7(9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(18, 4)], ChordFamily.Tetrad),
+    new ChordType('7(b9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(18, 4)], ChordFamily.Tetrad),
+    new ChordType('7(#9,#11)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(18, 4)], ChordFamily.Tetrad),
+    new ChordType('min7(9,11)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2),  new Interval(17, 4)], ChordFamily.Tetrad),
+    new ChordType('min7b5(9,11)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2), new Interval(17, 4)], ChordFamily.Tetrad),
+    new ChordType('Maj7(9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(b9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(#9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(20, 6)], ChordFamily.Tetrad),
+    new ChordType('7(b9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(20, 6)], ChordFamily.Tetrad),
+    new ChordType('7(#9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(20, 6)], ChordFamily.Tetrad),
+    new ChordType('min7(9,13)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2),  new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('min7b5(9,13)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('Maj7(9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(11, 7), new Interval(14, 2), new Interval(18, 4), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(18, 4), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(b9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(18, 4), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(#9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(18, 4), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(18, 4), new Interval(20, 6)], ChordFamily.Tetrad),
+    new ChordType('7(b9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(18, 4), new Interval(20, 6)], ChordFamily.Tetrad),
+    new ChordType('7(#9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(15, 2), new Interval(18, 4), new Interval(20, 6)], ChordFamily.Tetrad),
+    new ChordType('min7(9,11,13)', [new Interval(3, 3), new Interval(7, 5), new Interval(10, 7), new Interval(14, 2), new Interval(17, 4),  new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('min7b5(9,11,13)', [new Interval(3, 3), new Interval(6, 5), new Interval(10, 7), new Interval(14, 2), new Interval(17, 4), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(b9,#9,#11,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(18, 4), new Interval(20, 6)], ChordFamily.Tetrad),
+    new ChordType('7(b9,#9,#11,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(18, 4), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(b9,#9,13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(21, 6)], ChordFamily.Tetrad),
+    new ChordType('7(b9,#9,b13)', [new Interval(4, 3), new Interval(7, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(20, 6)], ChordFamily.Tetrad),
+    new ChordType('7b5(b9,#9,b13)', [new Interval(4, 3), new Interval(6, 5), new Interval(10, 7), new Interval(13, 2), new Interval(15, 2), new Interval(20, 6)], ChordFamily.Tetrad),
 ];
-
-export enum Drop {
-    None,
-
-    Drop2,
-    Drop3,
-    Drop13,
-    Drop24,
-}
 
 export class Chord {
     name: string;
@@ -173,6 +183,15 @@ export class Chord {
         this.rootNote = clone(rootNote);
         this.type = type;
 
+        // Check that drops are authorized.
+        for (let i = drop.length - 1; i >= 0; i--) {
+            if (!type.isDropCompatible(drop[i])) {
+                console.error(`Drop ${drop[i]} is not compatible with chord type ${type.name}`);
+                drop.splice(i); // Remove drop that are not compatible.
+            }
+        }
+        
+        // Fill chord with the chord notes.
         this.notes = [ this.rootNote ];
         for (let i = 0; i < type.degrees.length; ++i) {
             let semitone = (this.rootNote.semitone + type.degrees[i].semitone) % 12;
@@ -190,13 +209,14 @@ export class Chord {
             this.notes.push(note)
         }
 
+        // Compute the chord inversion to be the requested one even after a potential drop.
         var tempInversion = inversion;
         var dropName = "";
         
         if (drop.length > 0) {
             dropName += ` drop `;
             var lastDrop = drop[drop.length - 1];
-            tempInversion = (inversion + type.inversionCount - (4 - lastDrop)) % type.inversionCount;
+            tempInversion = (inversion + lastDrop) % type.inversionCount;
         }
 
         // Apply inversion.
@@ -206,6 +226,7 @@ export class Chord {
 
         this.notes = sortBy(this.notes, note => note.octave * 12 + note.semitone);
 
+        // Apply drop.
         for (var d = 0; d < drop.length; d++) {
             dropName += d > 0 ? `,${drop[d]}` : drop[d];
             this.notes[type.inversionCount - drop[d]].octave--;
