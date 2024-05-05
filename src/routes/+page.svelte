@@ -26,11 +26,24 @@
         }
     }
 
+    let inversionFilter = [0];
+    function toggleInversion(inversion: number) {
+        const index = inversionFilter.indexOf(inversion);
+        if (inversionFilter.indexOf(inversion) < 0) {
+            inversionFilter = [...inversionFilter, inversion];
+        } else {
+            inversionFilter.splice(index, 1);
+            inversionFilter = inversionFilter; // this is needed to tell svelte to refresh inversionFilter dependencies: https://learn.svelte.dev/tutorial/updating-arrays-and-objects
+        }
+    }
+
     let chord: Chord | undefined;
     function getRandomChord() {
+        // Root note:
         let index = Math.floor(Math.random() * rootNotes.length);
         let rootNote = rootNotes[index];
 
+        // Chord type:
         let activeChordTypeCount = 0;
         for (let i = 0; i < chordTypeFilters.length; ++i) {
             const filter = chordTypeFilters[i];
@@ -58,7 +71,21 @@
             return;
         }
 
-        let inversion = Math.floor(Math.random() * chordType.inversionCount);
+        // Inversion:
+        let inversions = [];
+        for (let i = 0; i < chordType.inversionCount; i++) {
+            if (inversionFilter.indexOf(i) !== -1) {
+                inversions.push(i);
+            }
+        }
+
+        if (inversions.length === 0) {
+            console.error("No inversion available for current filters.")
+            return;
+        }
+
+        index = Math.floor(Math.random() * inversions.length);
+        let inversion = inversions[index];
 
         let drop: number[] = [];
         if (chordType.inversionCount === 3) {
@@ -142,6 +169,25 @@
                         </div>
                     {/if}
                 {/each}
+            </div>
+        </div>
+        <div class="column">
+            <h4 class="title is-4">Inversion</h4>
+            <div class="grid">
+                <div class="cell">
+                    <button class="button is-rounded" class:is-active={inversionFilter.indexOf(0) !== -1} on:click={_ => toggleInversion(0)}>
+                        PF
+                    </button>
+                    <button class="button is-rounded" class:is-active={inversionFilter.indexOf(1) !== -1} on:click={_ => toggleInversion(1)}>
+                        R1
+                    </button>
+                    <button class="button is-rounded" class:is-active={inversionFilter.indexOf(2) !== -1} on:click={_ => toggleInversion(2)}>
+                        R2
+                    </button>
+                    <button class="button is-rounded" class:is-active={inversionFilter.indexOf(3) !== -1} on:click={_ => toggleInversion(3)}>
+                        R3
+                    </button>
+                </div>
             </div>
         </div>
     </div>

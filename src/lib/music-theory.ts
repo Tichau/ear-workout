@@ -187,7 +187,7 @@ export class Chord {
         for (let i = drop.length - 1; i >= 0; i--) {
             if (!type.isDropCompatible(drop[i])) {
                 console.error(`Drop ${drop[i]} is not compatible with chord type ${type.name}`);
-                drop.splice(i); // Remove drop that are not compatible.
+                drop.splice(i, 1); // Remove drop that are not compatible.
             }
         }
         
