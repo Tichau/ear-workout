@@ -7,7 +7,10 @@ fi
 
 deployBranch=$1
 BASE_PATH='/ear-workout'
-export BASE_PATH # BASE_PATH will be used during build process.
+APP_DIR='app' # GitHub Pages cannot serve content from directories with special characters like underscores.
+
+# Export env variable to be used by build process.
+export BASE_PATH APP_DIR
 
 set -e pipefail
 
@@ -48,7 +51,7 @@ echo ""
 git checkout $deployBranch
 git pull origin $deployBranch
 
-rm -r _app/
+rm -r $APP_DIR
 cp -r build/* .
 
 git add .
