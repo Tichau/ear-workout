@@ -3,6 +3,8 @@
 Ear Workout is an application made to give you tools for ear training. For now it include a chord generator following music theory rules.
 You can toggle filters to allow the generation of chord types, then generate a random chord. The algorithm gives you the notes of the chord that you must sing.
 
+![Ear Workout screenshot](screenshot.png)
+
 ## Setup development environment
 
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`).
