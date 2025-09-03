@@ -1,22 +1,13 @@
-# create-svelte
+# Ear Workout
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+Ear Workout is an application made to give you tools for ear training. For now it include a chord generator following music theory rules.
+You can toggle filters to allow the generation of chord types, then generate a random chord. The algorithm gives you the notes of the chord that you must sing.
 
-## Creating a project
+## Setup development environment
 
-If you're seeing this, you've probably already done this step. Congrats!
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`).
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+To start a development server:
 
 ```bash
 npm run dev
@@ -35,4 +26,10 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## Deploy
+
+To deploy the application, run the script `./deploy.sh deploy`
+
+> Note: The current deploy script is made to be used with GitHub pages.
+
+> Node 2: If your repo name is not equivalent to your-username.github.io, make sure to update the BASE_PATH variable in the deploy script to match your repo name.
