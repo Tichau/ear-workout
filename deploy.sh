@@ -6,6 +6,8 @@ if (($# != 1)); then
 fi
 
 deployBranch=$1
+BASE_PATH='/ear-workout'
+export BASE_PATH # BASE_PATH will be used during build process.
 
 set -e pipefail
 

@@ -1,8 +1,6 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
-const dev = process.argv.includes('dev');
-
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
   // Consult https://kit.svelte.dev/docs/integrations#preprocessors
@@ -15,10 +13,11 @@ const config = {
     // See https://kit.svelte.dev/docs/adapters for more information about adapters.
     appDir: 'app', // GitHub Pages cannot serve content from directories with special characters like underscores.
     adapter: adapter({
-      fallback: 'index.html' // may differ from host to host
+      fallback: 'index.html'
     }),
     paths: {
-      base: dev ? '' : process.env.BASE_PATH,
+      // Doc: https://svelte.dev/docs/kit/adapter-static#GitHub-Pages
+      base: process.argv.includes('dev') ? '' : process.env.BASE_PATH
     },
     version: {
       name: process.env.npm_package_version
